@@ -18,14 +18,18 @@ def start_app(llm, portfolio):
             try:
                 loader = WebBaseLoader(url_input)
                 data = text_preprocess(loader.load()[0].page_content)
+                if "Access Denied" in data:
+                    st.error("Unable to web scrape the URL.")
+                    return
                 portfolio.load_portfolio()
                 job = llm.extract_job_info(data)
                 skills = job.get("skills",[])
                 links = portfolio.query_for_links(skills)
                 email = llm.write_mail(job,links)
-                st.code(email,language="markdown")
+                st.write("### Generated Email:")
+                st.write(email)
             except Exception as e:
-                st.error(f"An error occurred: {e}")
+                st.error(f"An error occurred. Please try with a different URL. Error: {e}")
                 #st.warning("Please check the URL and try again.")
 
 if __name__ == "__main__":
